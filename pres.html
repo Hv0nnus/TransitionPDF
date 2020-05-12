@@ -181,11 +181,13 @@ ffmpeg -i vids/1-2.mp4 -vf reverse vids/2-1.mp4
                 let im = slides[c]
 
                 let playVideoThenStep = (im, thenStep) => {
-                    im.playbackRate = 5 // speedup of the transition
+                    im.playbackRate = 4 // speedup of the transition
+                    if (dir == 'backward') {
+                        im.playbackRate = 8
+                    }
                     im.onended = () => {
                         step(thenStep)
                     }
-                    im.parentElement.classList.add('current') // so that it is shown and no lazy optimization can be done to not seek the video
                     im.onseeked = () => {
                         slides.forEach((e,i) => e.classList.toggle('current', i==c))
                         im.play()
