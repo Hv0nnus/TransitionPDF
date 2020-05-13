@@ -1,3 +1,0 @@
-Transport Optimal pour les images :
-- p56 du papier Computational Optimal Transport : "Note finally that, on low-dimensional regular grids in Euclidean space, it is possibleto couple these classical linear solvers with multiscale strategies, to obtain a significant speed-up Schmitzer, 2016a (https://arxiv.org/pdf/1510.05466.pdf), Oberman and Ruan, 2015 (https://arxiv.org/pdf/1509.03668.pdf)."
-- A propos du RGB, peut-être que la section 10.5 "Transporting Vectors and Matrices" de Computational Optimal Transport peut être intéressante

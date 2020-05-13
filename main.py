@@ -1,5 +1,7 @@
+#!~/anaconda/envs/Transition/bin/python python
 #!/usr/bin/env python
 # coding: utf-8
+
 
 # In[6]:
 import argparse
@@ -9,7 +11,6 @@ import subprocess
 # import imageio
 from PyPDF2 import PdfFileWriter, PdfFileReader
 import io
-import moviepy.editor as mpy
 import subprocess
 
 import numpy as np
@@ -132,7 +133,7 @@ def pdf_page_to_png(src_pdf, pagenum=0, resolution=72, ):
 # In[5]:
 
 
-def preprocess(path, path_slide="./Presentation_OT.pdf", quality=(250, 250)):
+def preprocess(path, path_slide="./Presentation_OT.pdf", quality=(250, 250), quality_pres=(500, 500)):
     inputpdf = PdfFileReader(open(path_slide, "rb"))
     for i in range(inputpdf.numPages):
         output = PdfFileWriter()
@@ -148,6 +149,14 @@ def preprocess(path, path_slide="./Presentation_OT.pdf", quality=(250, 250)):
                                                str(quality[0]),
                                                "-ry",
                                                str(quality[1])])
+        output_bash = subprocess.check_output(['pdftoppm',
+                                               path + "./pdf_generated/" + str(i) + ".pdf",
+                                               path + "./png_generated/" + str(i) + "_pres",
+                                               "-png",
+                                               "-rx",
+                                               str(quality_pres[0]),
+                                               "-ry",
+                                               str(quality_pres[1])])
     return i + 1
 
 
@@ -160,8 +169,9 @@ def main(path="./pdftoimage/",
          color_reg=1,
          pos_reg=1,
          pos=None,
-         quality=(250, 250)):
-    number_slide = preprocess(path_slide=path_slide, path=path, quality=quality)
+         quality=(250, 250),
+         quality_pres=(500, 500)):
+    number_slide = preprocess(path_slide=path_slide, path=path, quality=quality, quality_pres=quality_pres)
 
     number_color = 3
 
@@ -206,7 +216,7 @@ def main(path="./pdftoimage/",
         dict_plot["X"] = X
         dict_plot["I_PIL"] = [I_PIL[i], I_PIL[i + 1]]
         dict_plot["path"] = path
-        with open(path + "/pickle_T/" + path_slide[2:-4] + str(i) + ".pickle", 'wb') as handle:
+        with open(path + "pickle_T/" + path_slide[2:-4] + str(i) + ".pickle", 'wb') as handle:
             pickle.dump(dict_plot, handle)
 
 
@@ -224,8 +234,8 @@ def plot(path="./pdftoimage/",
     while True:
         i = i + 1
         try:
-            print(path + "/pickle_T/" + path_slide[2:-4] + str(i) + ".pickle")
-            with open(path + "/pickle_T/" + path_slide[2:-4] + str(i) + ".pickle", 'rb') as handle:
+            print(path + "pickle_T/" + path_slide[2:-4] + str(i) + ".pickle")
+            with open(path + "pickle_T/" + path_slide[2:-4] + str(i) + ".pickle", 'rb') as handle:
                 dict_plot = pickle.load(handle)
         except:
             break
@@ -274,7 +284,6 @@ def plot(path="./pdftoimage/",
             #             for k in range(len(T[0])):
             #                 x_pos_k,y_pos_k,color1,color2,color3 = X[i][T_pos[0][k]] * t + X[i + 1][T_pos[1][k]] * (1 - t)
             #                 I_t[int(x_pos_k), int(y_pos_k)] += np.array([color1, color2, color3]) * T_val[k]
-
             pos = X[i][T_pos[0]] * t + X[i + 1][T_pos[1]] * (1 - t)
             I_t[pos[:, 0].astype(int), pos[:, 1].astype(int)] += pos[:, 2:] * T_val[:, np.newaxis]
 
@@ -311,13 +320,13 @@ def plot(path="./pdftoimage/",
 
 def create_gif(path="./pdftoimage/",
                path_slide="./Presentation_OT.pdf", duration=200):
-    def make_gif(path_gif, input_png_list):
-        clips = [mpy.ImageClip(i).set_duration(0.1)
-                 for i in input_png_list]
-        concat_clip = mpy.concatenate_videoclips(clips, method="compose")
-        concat_clip.write_gif(path_gif, fps=2)
+    # def make_gif(path_gif, input_png_list):
+    #     clips = [mpy.ImageClip(i).set_duration(0.1)
+    #              for i in input_png_list]
+    #     concat_clip = mpy.concatenate_videoclips(clips, method="compose")
+    #     concat_clip.write_gif(path_gif, fps=2)
 
-    with open(path + "/pickle_T/" + path_slide[2:-4] + ".pickle", 'rb') as handle:
+    with open(path + "pickle_T/" + path_slide[2:-4] + ".pickle", 'rb') as handle:
         dict_plot = pickle.load(handle)
 
     t_list = dict_plot["t_list"]
@@ -333,7 +342,6 @@ def create_gif(path="./pdftoimage/",
             images.append(Image.open(path + "png_transition_generated/" + str(i) + "_" + str(t) + ".png"))
             images[-1] = images[-1].resize((images[0].size), Image.ANTIALIAS)
         images.append(Image.open(path + "png_generated/" + str(i + 1) + "-" + str(1) + ".png"))
-
         images[0].save(path + "gif_generated/" + str(i) + "-" + str(i + 1) + '.gif',
                        save_all=True,
                        append_images=images[1:],
@@ -350,25 +358,37 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='GROMAP')
     parser.add_argument('--qualityx', type=int, default=50)
     parser.add_argument('--qualityy', type=int, default=50)
-    parser.add_argument('--duration', type=int, default=200)
-    parser.add_argument('-T', '--T', action="store_true")
-    parser.add_argument('-P', '--P', action="store_true")
+    parser.add_argument('--qualityx_pres', type=int, default=500)
+    parser.add_argument('--qualityy_pres', type=int, default=500)
+    parser.add_argument('--duration', type=int, default=300)
+    parser.add_argument('--number_slide', type=int, default=None)
+    parser.add_argument('--K', type=int, default=100)
+    parser.add_argument('-T', '--T', action="store_false")
+    parser.add_argument('-P', '--P', action="store_false")
+    parser.add_argument('-G', '--G', action="store_false")
+    parser.add_argument('-V', '--V', action="store_false")
+    # parser.add_argument('--t_list', type=str, default="0.001,0.005,0.01,0.05,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,0.95,0.99,0.995,0.999")
+    parser.add_argument('--t_list', type=str, default="0.001,0.005,0.01,0.05,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,0.95,0.99,0.995,0.999")
     args = parser.parse_args()
+    I = args.number_slide
+    t_list = (args.t_list).split(",")
+    for i in range(len(t_list)):
+        t_list[i] = float(t_list[i])
     if args.T:
-        main(K=30, quality=(args.qualityx, args.qualityy))
-        plot(height=10, width=10, save=True, plot_fig=False)
+        main(K=args.K, quality=(args.qualityx, args.qualityy), quality_pres=(args.qualityx_pres, args.qualityy_pres))
     if args.P:
-        plot(height=10, width=10, save=True, plot_fig=False)
-    # I = create_gif(duration=args.duration)
-    I = 9
-    # subprocess.check_call(["bash ./video.sh", str(I - 1)], shell=True)
-    # subprocess.call("bash ./video.sh", shell=True)
-    i = 0
-    j = 1
+        plot(save=True, plot_fig=False, t_list=t_list)
+    if args.G:
+        I = create_gif(duration=args.duration)
+    assert I is not None
+    if args.V:
+        subprocess.check_call(["./video.sh", str(I - 1)])
 
-    # subprocess.call("webm -i. / pdftoimage / gif_generated /" + str(i) + "-" + str(j) +".gif. / pdftoimage / video_generated /" +
+    # subprocess.call("webm -i ./ pdftoimage / gif_generated /" + str(i) + "-" + str(j) +".gif. / pdftoimage / video_generated /" +
     #                 str(i) + "-" + str(j) + ".mp4",
     #                 shell=True)
+    # print(("webm -i ./pdftoimage/gif_generated/" + str(i) + "-" + str(j) +".gif ./pdftoimage/video_generated/" +
+    #        str(i) + "-" + str(j) + ".mp4").split())
     # a = subprocess.run(("webm -i ./pdftoimage/gif_generated/" + str(i) + "-" + str(j) +".gif ./pdftoimage /video_generated /" +
     #                 str(i) + "-" + str(j) + ".mp4").split(), stdout=subprocess.PIPE, shell=True)
 # for i in range(2,20):
