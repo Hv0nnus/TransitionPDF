@@ -9,32 +9,38 @@
             html, body, div.cont {
                 width: 100%;
                 height: 100%;
+                padding: 0;
+                margin: 0;
             }
-
-            
             
             .cont {
-                width: 1280px;
-                height: 720px;
+                width: 1280px; /* ignored if the block above is present */
+                height: 720px; /* ignored if the block above is present */
                 position: relative;
             }
-            .cont * {
+            .cont * { /* all descendants ! */
+                object-position: center center; /* e.g.: left top */
+                object-fit: contain;
                 position: absolute;
                 left: 0; top: 0;
-                max-width: 100%;
-                height: 100%;
+                width: 100%; height: 100%;
             }
-            .cont>* {
+            .cont>*:not(.current) {
                 visibility: hidden;
             }
-            .cont>.current {
-                visibility: visible;
-            }
             .cont>div {
-                width: 100%;
+                /*width: 100%;*/
             }
             .cont>div>video:not(.show) {
                 display: none;
+            }
+            
+            /* controls */
+            .controls {
+                position: absolute;
+                height: 0;
+                overflow: visible;
+                z-index: 1;
             }
         </style>
     </head>
