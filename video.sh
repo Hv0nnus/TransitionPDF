@@ -5,8 +5,9 @@ START=0
 for (( i=$START; i<=$1; i++ ))
 do
     let "j = ${i} + 1"
-    webm -i ./pdftoimage/gif_generated/${i}-${j}.gif ./pdftoimage/video_generated/${i}-${j}.mp4
-    webm -i ./pdftoimage/gif_generated/${j}-${i}.gif ./pdftoimage/video_generated/${j}-${i}.mp4
+    # probably no need to go through gif
+    webm -i ./pdftoimage/gif_generated/${i}-${j}.gif -foi='-r 50' ./pdftoimage/video_generated/${i}-${j}.mp4
+    webm -i ./pdftoimage/gif_generated/${j}-${i}.gif -foi='-r 50' ./pdftoimage/video_generated/${j}-${i}.mp4
 
 done
 
