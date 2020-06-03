@@ -130,9 +130,6 @@ def pdf_page_to_png(src_pdf, pagenum=0, resolution=72, ):
     return img
 
 
-# In[5]:
-
-
 def preprocess(path, path_slide="./Presentation_OT.pdf", quality=(250, 250), quality_pres=(500, 500)):
     inputpdf = PdfFileReader(open(path_slide, "rb"))
     for i in range(inputpdf.numPages):
@@ -158,9 +155,6 @@ def preprocess(path, path_slide="./Presentation_OT.pdf", quality=(250, 250), qua
                                                "-ry",
                                                str(quality_pres[1])])
     return i + 1
-
-
-# In[6]:
 
 
 def main(path="./pdftoimage/",
@@ -218,9 +212,6 @@ def main(path="./pdftoimage/",
         dict_plot["path"] = path
         with open(path + "pickle_T/" + path_slide[2:-4] + str(i) + ".pickle", 'wb') as handle:
             pickle.dump(dict_plot, handle)
-
-
-# In[7]:
 
 
 def plot(path="./pdftoimage/",
