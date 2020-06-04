@@ -237,9 +237,9 @@ ffmpeg -i vids/1-2.mp4 -vf reverse vids/2-1.mp4
                 let im = slides[c]
 
                 let playVideoThenStep = (im, thenStep) => {
-                    im.playbackRate = 4 // speedup of the transition
+                    im.playbackRate = 1.5 // speedup of the transition
                     if (dir == 'backward') {
-                        im.playbackRate = 8
+                        im.playbackRate = 3
                     }
                     im.onended = () => {
                         step(thenStep)

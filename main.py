@@ -24,6 +24,8 @@ from scipy.sparse import coo_matrix, csc_matrix
 from sklearn.cluster import KMeans
 import pickle
 
+from skimage import color #, io
+
 
 # In[2]:
 
@@ -38,6 +40,7 @@ def normalise(source, target):
 def scale_recursive_OT(X1, X2, K, time_init, color_reg, pos_reg, first=False, second=False):
     if first:
         print("shape input", X1.shape, X2.shape)
+        print("input range", np.min(X1, axis=0), np.max(X1, axis=0))
     if K is None:
         K = 10
     m = len(X1)
@@ -299,6 +302,7 @@ def plot(path="./pdftoimage/",
                 plt.savefig(path_generated + str(i) + "_" + str(t) + ".png", bbox_inches='tight', pad_inches=0)
             if plot_fig:
                 plt.show()
+            plt.close('all')
         fig = plt.figure(figsize=(height, width))
         plt.imshow(1 - I_PIL[1])
         plt.axis('off')
@@ -363,17 +367,24 @@ if __name__ == "__main__":
     parser.add_argument('--duration', type=int, default=300)
     parser.add_argument('--number_slide', type=int, default=None)
     parser.add_argument('--K', type=int, default=100)
+    parser.add_argument('-p', '--repreprocess', action="store_true")
     parser.add_argument('-T', '--T', action="store_false")
     parser.add_argument('-P', '--P', action="store_false")
     parser.add_argument('-G', '--G', action="store_false")
     parser.add_argument('-V', '--V', action="store_false")
     # parser.add_argument('--t_list', type=str, default="0.001,0.005,0.01,0.05,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,0.95,0.99,0.995,0.999")
-    parser.add_argument('--t_list', type=str, default="0.001,0.005,0.01,0.05,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,0.95,0.99,0.995,0.999")
+    #parser.add_argument('--t_list', type=str, default="0.001,0.005,0.01,0.05,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,0.95,0.99,0.995,0.999")
+    parser.add_argument('--t_list', type=str, default=",".join(map(str, np.linspace(0, 1, 50))))
     args = parser.parse_args()
     I = args.number_slide
     t_list = (args.t_list).split(",")
     for i in range(len(t_list)):
         t_list[i] = float(t_list[i])
+    if args.repreprocess:
+        path="./pdftoimage/"
+        path_slide="./Presentation_OT.pdf"
+        preprocess(path_slide=path_slide, path=path, quality=(args.qualityx, args.qualityy), quality_pres=(args.qualityx_pres, args.qualityy_pres))
+        exit()
     if args.T:
         main(K=args.K, quality=(args.qualityx, args.qualityy), quality_pres=(args.qualityx_pres, args.qualityy_pres))
     if args.P:
