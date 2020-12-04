@@ -83,7 +83,7 @@ def scale_recursive_OT(X1, X2, K, time_init, color_reg, pos_reg, first=False, se
                     M = ((X1i[:, np.newaxis, :] - X2j[np.newaxis, :, :]) ** 2).sum(axis=2) ** 0.5
                     T_ = ot.emd(a=ot.unif(X1i.shape[0]),
                                 b=ot.unif(X2j.shape[0]),
-                                M=M) * counts1[i] * counts2[j]
+                                M=M) * T_partial[i, j]
                     T_coo = coo_matrix(T_)
                     T = [T_coo.row, T_coo.col, T_coo.data]
                 else:
@@ -94,7 +94,7 @@ def scale_recursive_OT(X1, X2, K, time_init, color_reg, pos_reg, first=False, se
                     T = scale_recursive_OT(X1i, X2j, K, time_init, color_reg, pos_reg, second=second)
                     #                     print(type(T[2]))
                     #                     print(T[2], counts1[i], counts2[j])
-                    T[2] = T[2] * counts1[i] * counts2[j]
+                    T[2] = T[2] * T_partial[i, j]
                 for k in range(len(T[0])):
                     T_row.append(argwhere1i[T[0][k]])
                     T_col.append(argwhere2j[T[1][k]])
